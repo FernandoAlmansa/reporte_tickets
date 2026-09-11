@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Panel de tickets — instalación</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--papel:#FBFAF5;--banda:#E4EDE3;--tinta:#1C2621;--verde:#2F6B4F;--gris:#6C776F;--linea:#CBD5C7}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--papel);color:var(--tinta);
+       font:400 16px/1.6 "IBM Plex Sans",Segoe UI,system-ui,sans-serif}
+  .hoja{max-width:640px;margin:0 auto;padding:56px 24px 90px}
+  h1{font-size:26px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em}
+  .sub{color:var(--gris);margin:0 0 40px}
+  h2{font-size:15px;font-weight:600;margin:36px 0 8px}
+  p{margin:0 0 12px;max-width:62ch}
+  ol{padding-left:20px;margin:0 0 12px;max-width:62ch}
+  li{margin-bottom:8px}
+  code{font-family:"IBM Plex Mono",Consolas,monospace;font-size:.9em;
+       background:var(--banda);padding:1px 5px;border-radius:2px}
+  .arrastrable{display:flex;align-items:center;gap:16px;background:var(--banda);
+       border:1px solid var(--verde);border-radius:3px;padding:18px 20px;margin:8px 0 4px}
+  .bm{display:inline-block;background:var(--verde);color:#fff;text-decoration:none;
+      padding:9px 18px;border-radius:3px;font-weight:500;cursor:grab;white-space:nowrap}
+  .bm:active{cursor:grabbing}
+  .arrastrable span{color:var(--gris);font-size:14px}
+  .copiar{font:inherit;font-size:13.5px;background:#fff;border:1px solid var(--linea);
+      border-radius:2px;padding:5px 12px;cursor:pointer;color:var(--verde)}
+  .nota{color:var(--gris);font-size:14px;max-width:62ch}
+  .aviso{border-left:3px solid var(--verde);padding:2px 0 2px 14px;margin:10px 0 0}
+  footer{margin-top:48px;padding-top:14px;border-top:1px solid var(--linea);
+      color:var(--gris);font-size:13.5px}
+</style>
+</head>
+<body>
+<div class="hoja">
+  <h1>Panel de tickets cerrados</h1>
+  <p class="sub">Un botón en la barra de favoritos que arma el reporte adentro de Redmine.</p>
+
+  <h2>Instalación</h2>
+  <p>Mostrá la barra de favoritos (<code>Ctrl+Shift+B</code>) y arrastrá este botón hasta ahí.</p>
+
+  <div class="arrastrable">
+    <a class="bm" id="bm" href="#">Tickets cerrados</a>
+    <span>Arrastralo a tu barra de favoritos</span>
+  </div>
+  <p><button class="copiar" id="copiar">Copiar el código</button>
+     <span class="nota" id="estado"></span></p>
+  <p class="nota">Si preferís cargarlo a mano: nuevo favorito, y en el campo de dirección pegás
+     el código copiado.</p>
+
+  <h2>Uso</h2>
+  <ol>
+    <li>Abrí cualquier página de Redmine, con tu sesión ya iniciada.</li>
+    <li>Clic en el favorito. El panel se abre encima.</li>
+    <li>Otro clic en el favorito, o <code>Esc</code>, y se cierra.</li>
+  </ol>
+  <p>Filtrás por cliente y por tipo marcando varios a la vez, hacés clic en una barra mensual
+     para quedarte con ese mes, ordenás la tabla por cualquier columna y bajás lo que quede
+     filtrado en CSV.</p>
+
+  <h2>Por qué funciona así</h2>
+  <p class="aviso">El código corre dentro de la página de Redmine, o sea que usa la sesión que
+     ya tenés abierta. No hay API key para guardar en ningún lado, y no hay que pedir permisos
+     de CORS. En una computadora nueva alcanza con volver a arrastrar el botón.</p>
+
+  <footer>
+    Los datos se consultan en vivo cada vez y no quedan guardados acá.
+    Esta página solo hospeda el código.
+  </footer>
+</div>
+
+<script>
+  const destino = new URL("dash.js", location.href).href;
+  const codigo = "javascript:(function(){var s=document.createElement('script');"
+    + "s.src='" + destino + "?'+Date.now();document.body.appendChild(s);})()";
+  const bm = document.getElementById("bm");
+  bm.href = codigo;
+  bm.onclick = e => {
+    e.preventDefault();
+    estado.textContent = "Arrastralo a la barra, no le hagas clic acá.";
+  };
+  document.getElementById("copiar").onclick = async () => {
+    try{
+      await navigator.clipboard.writeText(codigo);
+      estado.textContent = "Copiado.";
+    }catch(e){
+      estado.textContent = "No se pudo copiar; el código está en el enlace de arriba.";
+    }
+  };
+</script>
+</body>
+</html>
