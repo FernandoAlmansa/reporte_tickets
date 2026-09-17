@@ -38,29 +38,39 @@
 <body>
 <div class="hoja">
   <h1>Panel de tickets cerrados</h1>
-  <p class="sub">Un botón en la barra de favoritos que arma el reporte adentro de Redmine.</p>
+  <p class="sub">Dos botones en la barra de favoritos que arman los reportes adentro de Redmine.</p>
 
   <h2>Instalación</h2>
-  <p>Mostrá la barra de favoritos (<code>Ctrl+Shift+B</code>) y arrastrá este botón hasta ahí.</p>
+  <p>Mostrá la barra de favoritos (<code>Ctrl+Shift+B</code>) y arrastrá cada botón hasta ahí.</p>
 
   <div class="arrastrable">
     <a class="bm" id="bm" href="#">Tickets cerrados</a>
-    <span>Arrastralo a tu barra de favoritos</span>
+    <span>Panel con lo que cerraste, por período y por cliente</span>
   </div>
-  <p><button class="copiar" id="copiar">Copiar el código</button>
+  <p><button class="copiar" data-copiar="bm">Copiar el código</button>
      <span class="nota" id="estado"></span></p>
-  <p class="nota">Si preferís cargarlo a mano: nuevo favorito, y en el campo de dirección pegás
-     el código copiado.</p>
+
+  <div class="arrastrable">
+    <a class="bm" id="bmx" href="#">Excel de asignados</a>
+    <span>Baja un .xlsx con los tickets que tenés abiertos</span>
+  </div>
+  <p><button class="copiar" data-copiar="bmx">Copiar el código</button></p>
+
+  <p class="nota">Si preferís cargarlos a mano: nuevo favorito, y en el campo de dirección
+     pegás el código copiado.</p>
 
   <h2>Uso</h2>
   <ol>
     <li>Abrí cualquier página de Redmine, con tu sesión ya iniciada.</li>
-    <li>Clic en el favorito. El panel se abre encima.</li>
+    <li>Clic en el favorito que quieras. Se abre encima.</li>
     <li>Otro clic en el favorito, o <code>Esc</code>, y se cierra.</li>
   </ol>
-  <p>Filtrás por cliente y por tipo marcando varios a la vez, hacés clic en una barra mensual
-     para quedarte con ese mes, ordenás la tabla por cualquier columna y bajás lo que quede
-     filtrado en CSV.</p>
+  <p><b>Tickets cerrados</b> filtra por cliente y por tipo marcando varios a la vez, te deja
+     hacer clic en una barra mensual para quedarte con ese mes, ordenar la tabla por cualquier
+     columna y bajar lo filtrado en CSV.</p>
+  <p><b>Excel de asignados</b> arma un libro con dos hojas: el detalle de cada ticket abierto
+     — con el número de caso de ADP en su propia columna, listo para copiar — y un resumen por
+     cliente y por estado con fórmulas que se recalculan solas.</p>
 
   <h2>Por qué funciona así</h2>
   <p class="aviso">El código corre dentro de la página de Redmine, o sea que usa la sesión que
@@ -74,23 +84,29 @@
 </div>
 
 <script>
-  const destino = new URL("dash.js", location.href).href;
-  const codigo = "javascript:(function(){var s=document.createElement('script');"
-    + "s.src='" + destino + "?'+Date.now();document.body.appendChild(s);})()";
-  const bm = document.getElementById("bm");
-  bm.href = codigo;
-  bm.onclick = e => {
-    e.preventDefault();
-    estado.textContent = "Arrastralo a la barra, no le hagas clic acá.";
+  const armar = archivo => {
+    const destino = new URL(archivo, location.href).href;
+    return "javascript:(function(){var s=document.createElement('script');"
+      + "s.src='" + destino + "?'+Date.now();document.body.appendChild(s);})()";
   };
-  document.getElementById("copiar").onclick = async () => {
+  const codigos = { bm: armar("dash.js"), bmx: armar("excel.js") };
+
+  for (const id in codigos) {
+    const a = document.getElementById(id);
+    a.href = codigos[id];
+    a.onclick = e => {
+      e.preventDefault();
+      estado.textContent = "Arrastralo a la barra, no le hagas clic acá.";
+    };
+  }
+  document.querySelectorAll("[data-copiar]").forEach(b => b.onclick = async () => {
     try{
-      await navigator.clipboard.writeText(codigo);
+      await navigator.clipboard.writeText(codigos[b.dataset.copiar]);
       estado.textContent = "Copiado.";
     }catch(e){
       estado.textContent = "No se pudo copiar; el código está en el enlace de arriba.";
     }
-  };
+  });
 </script>
 </body>
 </html>
