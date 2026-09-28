@@ -8,8 +8,8 @@
 
   /* Clientes de ADP, por identificador de proyecto. Editá esta lista si cambia la cartera. */
   const ADP = ["amex", "bunge", "cargill", "corteva", "dow", "faurecia", "general-motors",
-               "global-business-travel", "halliburton", "ibm", "john-deere", "jhonson-jhonson",
-               "j-p-morgan", "kyndryl", "national-oliwell-varco", "weatherford", "alight-interno"];
+             "global-business-travel", "halliburton", "ibm", "john-deere", "jhonson-jhonson",
+             "j-p-morgan", "kyndryl", "national-oliwell-varco", "weatherford"];
   /* Equipo de ADP, por id de usuario de Redmine. */
   const EQUIPO = [36, 17, 70, 80, 56, 26];
 
