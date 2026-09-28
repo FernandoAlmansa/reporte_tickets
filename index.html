@@ -38,7 +38,7 @@
 <body>
 <div class="hoja">
   <h1>Panel de tickets cerrados</h1>
-  <p class="sub">Dos botones en la barra de favoritos que arman los reportes adentro de Redmine.</p>
+  <p class="sub">Tres botones en la barra de favoritos que arman los reportes adentro de Redmine.</p>
 
   <h2>Instalación</h2>
   <p>Mostrá la barra de favoritos (<code>Ctrl+Shift+B</code>) y arrastrá cada botón hasta ahí.</p>
@@ -56,6 +56,12 @@
   </div>
   <p><button class="copiar" data-copiar="bmx">Copiar el código</button></p>
 
+  <div class="arrastrable">
+    <a class="bm" id="bme" href="#">Equipo por mes</a>
+    <span>Matriz de cerrados por mes y por persona</span>
+  </div>
+  <p><button class="copiar" data-copiar="bme">Copiar el código</button></p>
+
   <p class="nota">Si preferís cargarlos a mano: nuevo favorito, y en el campo de dirección
      pegás el código copiado.</p>
 
@@ -71,6 +77,11 @@
   <p><b>Excel de asignados</b> arma un libro con dos hojas: el detalle de cada ticket abierto
      — con el número de caso de ADP en su propia columna, listo para copiar — y un resumen por
      cliente y por estado con fórmulas que se recalculan solas.</p>
+  <p><b>Equipo por mes</b> cruza personas contra meses. Arranca con el equipo de ADP y los
+     clientes de ADP, pero podés cambiar las dos cosas desde la barra. Avisa cuando detecta
+     cierres en masa, que inflan un mes sin haber sido trabajo de ese mes.</p>
+  <p class="nota">Si cambia la cartera de clientes o entra alguien al equipo, se editan las
+     listas <code>ADP</code> y <code>EQUIPO</code> arriba de <code>equipo.js</code>.</p>
 
   <h2>Por qué funciona así</h2>
   <p class="aviso">El código corre dentro de la página de Redmine, o sea que usa la sesión que
@@ -89,7 +100,11 @@
     return "javascript:(function(){var s=document.createElement('script');"
       + "s.src='" + destino + "?'+Date.now();document.body.appendChild(s);})()";
   };
-  const codigos = { bm: armar("dash.js"), bmx: armar("excel.js") };
+  const codigos = {
+    bm: armar("dash.js"),
+    bmx: armar("excel.js"),
+    bme: armar("equipo.js")
+  };
 
   for (const id in codigos) {
     const a = document.getElementById(id);
