@@ -15,6 +15,11 @@
   const RX_ADP = /\b1-\d{6,}\b/;
   const numeroAdp = s => (String(s || "").match(RX_ADP) || [""])[0];
 
+  /* Estados que no van al Excel (id 7 = "Pendiente KU" en rdm.hmconsulting). */
+  const EXCLUIR_ID = new Set([7]);
+  const EXCLUIR_NOMBRE = /^pendiente\s*ku$/i;
+  const excluido = i => EXCLUIR_ID.has(i.status.id) || EXCLUIR_NOMBRE.test(i.status.name || "");
+
   const host = document.createElement("div");
   host.id = ID;
   host.style.cssText = "position:fixed;inset:0;z-index:2147483000";
@@ -100,14 +105,16 @@
     }
   };
 
-  let T = [], yo = null, sel = new Set();
+  let T = [], yo = null, sel = new Set(), omitidos = 0;
 
   try {
     yo = (await api("/users/current.json")).user;
     const issues = await paginar("/issues.json", "issues", {
       assigned_to_id: yo.id, status_id: "open", sort: "project,created_on:asc"
     });
-    T = issues.map(i => ({
+    const validos = issues.filter(i => !excluido(i));
+    omitidos = issues.length - validos.length;
+    T = validos.map(i => ({
       id: i.id, adp: numeroAdp(i.subject), proyecto: i.project.name,
       tipo: i.tracker.name, estado: i.status.name, prioridad: i.priority.name,
       asunto: i.subject, autor: (i.author || {}).name || "",
@@ -124,7 +131,12 @@
     return;
   }
 
-  if (!T.length) { $(".est").textContent = "No tenés tickets abiertos asignados."; return; }
+  if (!T.length) {
+    $(".est").textContent = omitidos
+      ? `No hay tickets para exportar (${omitidos} en Pendiente KU, omitidos).`
+      : "No tenés tickets abiertos asignados.";
+    return;
+  }
 
   const clientes = [...new Set(T.map(t => t.proyecto))].sort((a, b) => a.localeCompare(b, "es"));
   let guardado = [];
@@ -144,7 +156,8 @@
     const n = elegidos().length;
     $(".est").innerHTML = `<b>${n}</b> ticket${n === 1 ? "" : "s"} abiertos` +
       (sel.size ? ` en ${sel.size} cliente${sel.size === 1 ? "" : "s"}` : " en todos los clientes") +
-      ` · ${elegidos().filter(t => t.adp).length} con N° de ADP`;
+      ` · ${elegidos().filter(t => t.adp).length} con N° de ADP` +
+      (omitidos ? ` · ${omitidos} en Pendiente KU omitido${omitidos === 1 ? "" : "s"}` : "");
     $('[data-a="bajar"]').disabled = !n;
     try { localStorage.setItem(CLAVE, JSON.stringify([...sel])); } catch (e) {}
   }
